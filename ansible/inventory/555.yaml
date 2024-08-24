@@ -1,0 +1,54 @@
+---
+all:
+  vars:
+    plabel_env: urgent
+    plabel_team: m-dra
+main:
+  children:
+    test:
+    local:
+    global:
+nftables:
+  children:
+    test:
+    local:
+local:
+  hosts:
+    # xpsbian:
+    #   ansible_host: xpsbian
+    # lws15dev:
+    #   ansible_host: lws15dev
+    ubuntu22:
+      ansible_user: deploy
+      ansible_host: ubuntu22
+global:
+  children:
+    aeza:
+    aruba:
+    freak:
+    vdsina:
+    hetzner:
+aeza:
+  hosts:
+    goofy-canvas:
+      ansible_host: goofy-canvas
+freak:
+  hosts:
+aruba:
+  hosts:
+    g2f:
+      ansible_host: g2f
+      ansible_python_interpreter: /usr/bin/python3.6
+vdsina:
+  hosts:
+    casual-glove:
+      ansible_host: casual-glove
+hetzner:
+  hosts:
+test:
+  hosts:
+    nsp4ans:
+      ansible_host: 192.168.99.2
+    dkr4ans:
+      # ansible_host: 192.168.99.2
+      ansible_connection: community.docker.docker_api

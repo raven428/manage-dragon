@@ -1,0 +1,32 @@
+---
+- name: wait for hosts and facts
+  hosts: main
+  gather_facts: false
+  tasks:
+    # this will reset multiplexing in this version or lower:
+    # https://github.com/ansible/ansible/blob/v2.16.10/lib/ansible/plugins/connection/ssh.py#L1428-L1435
+    # from
+    # https://github.com/ansible/ansible/blob/v2.16.10/lib/ansible/plugins/action/wait_for_connection.py#L87
+    - name: wait 222 seconds for connection
+      wait_for_connection2:
+        timeout: 222
+      check_mode: false
+      timeout: 222
+    # one more option:
+    # - name: wait 222 seconds for ssh
+    #   wait_for:
+    #     port: 22
+    #     timeout: 222
+    #     host: >-
+    #       {{
+    #         ansible_ssh_host |
+    #         default(ansible_host) |
+    #         default(inventory_hostname)
+    #       }}
+    #     search_regex: OpenSSH
+    #   connection: local
+    #   check_mode: false
+    - name: get the facts or fail fast
+      setup:
+      timeout: 55
+  tags: [always]
