@@ -1,0 +1,32 @@
+---
+name: test deploy
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    - cron: "11 11 * * 1"
+jobs:
+  test-deploy-nspawn:
+    name: nspawn deploy
+    timeout-minutes: 7
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: test deploy to nspawn
+        run: bin/test-nspawn.sh
+  test-deploy-docker:
+    name: docker deploy
+    timeout-minutes: 7
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: test deploy to docker
+        run: bin/test-docker.sh
