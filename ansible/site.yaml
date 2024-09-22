@@ -30,3 +30,10 @@
       setup:
       timeout: 55
   tags: [always]
+
+- name: add nftables firewall
+  hosts: nftables
+  become: true
+  roles:
+    - external/nftables
+  tags: [external-nftables]
