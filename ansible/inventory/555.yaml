@@ -50,5 +50,6 @@ test:
     nsp4ans:
       ansible_host: 192.168.99.2
     dkr4ans:
-      # ansible_host: 192.168.99.2
       ansible_connection: community.docker.docker_api
+    pdm4ans:
+      ansible_connection: containers.podman.podman
