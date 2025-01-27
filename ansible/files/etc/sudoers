@@ -1,0 +1,7 @@
+# sudoers light
+Defaults !env_reset
+root ALL=(ALL:ALL) NOPASSWD: ALL
+%root ALL=(ALL:ALL) NOPASSWD: ALL
+%sudo ALL=(ALL:ALL) NOPASSWD: ALL
+%admin ALL=(ALL:ALL) NOPASSWD: ALL
+@includedir /etc/sudoers.d
