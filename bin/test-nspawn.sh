@@ -1,42 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 : "${NSP_NAME:="nsp4ans"}"
+: "${CONTENGI:="docker"}"
 : "${CONT_NAME:="ans2nsp-${USER}"}"
+MY_BIN="$(readlink -f "$0")"
+MY_PATH="$(dirname "${MY_BIN}")"
 res=0
-/usr/bin/env which sponge >/dev/null || (
+echo "CONTENGI[${CONTENGI}]"
+/usr/bin/env which sponge >/dev/null || {
+  /usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get purge -y needrestart'
   /usr/bin/env sudo apt-get update &&
-    /usr/bin/env sudo apt-get install moreutils
-)
-/usr/bin/env which deploy-nspawn.sh >/dev/null || (
+    /usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get install -y moreutils'
+}
+/usr/bin/env which deploy-nspawn.sh >/dev/null || {
   /usr/bin/env curl -sL -o /usr/local/bin/deploy-nspawn.sh \
     https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/victim-ubuntu-22_04/files/deploy.sh
   /usr/bin/env chmod 755 /usr/local/bin/deploy-nspawn.sh
-)
-/usr/bin/env which ansible-docker.sh >/dev/null || (
-  /usr/bin/env curl -sL -o /usr/local/bin/ansible-docker.sh \
+}
+/usr/bin/env which ansible-docker.sh >/dev/null || {
+  /usr/bin/env sudo curl -sL -o /usr/local/bin/ansible-docker.sh \
     https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/ansible-9_9_0/ansible-docker.sh
-  /usr/bin/env chmod 755 /usr/local/bin/ansible-docker.sh
-)
-MY_BIN="$(readlink -f "$0")"
-MY_PATH="$(dirname "${MY_BIN}")"
+  /usr/bin/env sudo chmod 755 /usr/local/bin/ansible-docker.sh
+}
 # shellcheck disable=1090
 source "$(which deploy-nspawn.sh)"
 tmp_log=$(/usr/bin/env mktemp "/tmp/ansidemXXXXX.log")
-(
+ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-6_7_0:001'
+[[ "${CONTENGI}" == 'podman' ]] && export ANSIBLE_CONT_ADDONS='--userns=keep-id'
+export CONTENGI ANSIBLE_IMAGE_NAME ANSIBLE_CONT_ADDONS
+{
   cd "${MY_PATH}/../ansible"
-  ANSIBLE_CONT_NAME="${CONT_NAME}" \
-  ansible-docker.sh ansible-playbook site.yaml \
-    --diff -i inventory -u root -l "${NSP_NAME}" -t nonexistent
+  ANSIBLE_CONT_NAME="${CONT_NAME}" /usr/bin/env ansible-docker.sh true
   /usr/bin/env machinectl -la
   ANSIBLE_CONT_NAME="${CONT_NAME}" \
-  ansible-docker.sh ansible-playbook site.yaml \
+    /usr/bin/env ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${NSP_NAME}"
   ANSIBLE_LOG_PATH=${tmp_log} \
-  ANSIBLE_CONT_NAME="${CONT_NAME}" \
-    ansible-docker.sh ansible-playbook site.yaml \
+    ANSIBLE_CONT_NAME="${CONT_NAME}" \
+    /usr/bin/env ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${NSP_NAME}"
-  /usr/bin/env docker cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
-)
+  /usr/bin/env ${CONTENGI} cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
+}
 # shellcheck disable=2016
 changed_count="$(
   /usr/bin/env fgrep 'changed=' "${tmp_log}" |
