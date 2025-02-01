@@ -7,25 +7,25 @@ MY_BIN="$(readlink -f "$0")"
 MY_PATH="$(dirname "${MY_BIN}")"
 res=0
 echo "CONTENGI[${CONTENGI}]"
+/usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get purge -y needrestart'
 /usr/bin/env which sponge >/dev/null || {
-  /usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get purge -y needrestart'
   /usr/bin/env sudo apt-get update &&
     /usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get install -y moreutils'
 }
 /usr/bin/env which deploy-nspawn.sh >/dev/null || {
-  /usr/bin/env curl -sL -o /usr/local/bin/deploy-nspawn.sh \
+  /usr/bin/env sudo curl -sL -o /usr/local/bin/deploy-nspawn.sh \
     https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/victim-ubuntu-22_04/files/deploy.sh
-  /usr/bin/env chmod 755 /usr/local/bin/deploy-nspawn.sh
+  /usr/bin/env sudo chmod 755 /usr/local/bin/deploy-nspawn.sh
 }
 /usr/bin/env which ansible-docker.sh >/dev/null || {
   /usr/bin/env sudo curl -sL -o /usr/local/bin/ansible-docker.sh \
-    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/ansible-9_9_0/ansible-docker.sh
+    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/ansible-ubuntu/files/ansible-docker.sh
   /usr/bin/env sudo chmod 755 /usr/local/bin/ansible-docker.sh
 }
 # shellcheck disable=1090
 source "$(which deploy-nspawn.sh)"
 tmp_log=$(/usr/bin/env mktemp "/tmp/ansidemXXXXX.log")
-ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-6_7_0:001'
+ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-11_1_0:latest'
 [[ "${CONTENGI}" == 'podman' ]] && export ANSIBLE_CONT_ADDONS='--userns=keep-id'
 export CONTENGI ANSIBLE_IMAGE_NAME ANSIBLE_CONT_ADDONS
 {

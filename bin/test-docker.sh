@@ -17,15 +17,15 @@ echo "CONTENGI[${CONTENGI}]/CONAME[${CONAME}]"
 }
 /usr/bin/env which ansible-docker.sh >/dev/null || {
   /usr/bin/env sudo curl -sL -o /usr/local/bin/ansible-docker.sh \
-    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/ansible-9_9_0/ansible-docker.sh
+    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/ansible-ubuntu/files/ansible-docker.sh
   /usr/bin/env sudo chmod 755 /usr/local/bin/ansible-docker.sh
 }
 [[ "${SSH_AUTH_SOCK}" == '/dev/null' ]] && export SSH_AUTH_SOCK
 # https://www.redhat.com/en/blog/podman-inside-container
 ANSIBLE_CONT_ADDONS='--privileged'
-ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-6_7_0:001'
+ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-11_1_0:latest'
 [[ "${CONTENGI}" == 'docker' ]] && {
-  ANSIBLE_IMAGE_NAME="ghcr.io/raven428/container-images/${CONTENGI}-ansible-6_7_0:001"
+  ANSIBLE_IMAGE_NAME="ghcr.io/raven428/container-images/${CONTENGI}-ansible-11_1_0:latest"
   ANSIBLE_CONT_ADDONS='--cap-add=NET_ADMIN --cap-add=SYS_MODULE --cgroupns=host
 --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw'
   export ANSIBLE_CONT_COMMAND=' '
