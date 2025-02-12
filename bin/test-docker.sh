@@ -46,6 +46,16 @@ export CONTENGI ANSIBLE_CONT_ADDONS ANSIBLE_IMAGE_NAME
     sleep 1
   done
 }
+[[ "${CONTENGI}" == 'podman' ]] && {
+  /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" mkdir -p /etc/containers
+  /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" sh -c \
+    'cat <<EOF >/etc/containers/storage.conf
+[storage]
+driver = "vfs"
+runroot = "/run/containers/storage"
+graphroot = "/var/lib/containers/storage"
+EOF'
+}
 /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" ${CONTENGI} pull "${IMAGE}"
 /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" ${CONTENGI} tag "${IMAGE}" "${CONAME}:l"
 /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" ${CONTENGI} rm -f "${CONAME}" || true

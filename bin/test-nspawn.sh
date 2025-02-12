@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+
 : "${NSP_NAME:="nsp4ans"}"
 : "${CONTENGI:="docker"}"
 : "${CONT_NAME:="ans2nsp-${USER}"}"
