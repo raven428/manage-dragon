@@ -27,7 +27,7 @@ echo "CONTENGI[${CONTENGI}]"
 # shellcheck disable=1090
 source "$(which deploy-nspawn.sh)"
 tmp_log=$(/usr/bin/env mktemp "/tmp/ansidemXXXXX.log")
-ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-11_1_0:latest'
+ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-11:latest'
 [[ "${CONTENGI}" == 'podman' ]] && export ANSIBLE_CONT_ADDONS='--userns=keep-id'
 export CONTENGI ANSIBLE_IMAGE_NAME ANSIBLE_CONT_ADDONS
 {
