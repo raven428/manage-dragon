@@ -8,49 +8,59 @@ on:
   schedule:
     - cron: "11 11 * * 1"
 jobs:
-  test-deploy-nspawn4docker:
-    name: nspawn docker deploy
-    timeout-minutes: 5
-    runs-on: ubuntu-22.04
+  test-deploy:
+    name: deploy
+    timeout-minutes: 7
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - nspawn-docker
+          - nspawn-podman
+          - docker-docker
+          - podman-podman
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
       - name: test docker deploy to nspawn
-        run: bin/test-nspawn.sh
-  test-deploy-nspawn4podman:
-    name: nspawn podman deploy
-    timeout-minutes: 5
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: true
-      - name: test podman deploy to nspawn
-        run: CONTENGI='podman' bin/test-nspawn.sh
-  test-deploy-docker:
-    name: docker deploy
-    timeout-minutes: 5
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: true
-      - name: test deploy to docker
-        run: bin/test-docker.sh
-  test-deploy-podman:
-    name: podman deploy
-    timeout-minutes: 5
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: true
-      - name: test deploy to podman
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
-          sudo cp -vf ansible/files/etc/sudoers /etc/sudoers
-          CONAME='pdm4ans' CONTENGI='podman' sudo bin/test-docker.sh
+          case "${PLATFORM}" in
+            nspawn-docker)
+              bin/test-nspawn.sh
+            ;;
+            nspawn-podman)
+              CONTENGI='podman' bin/test-nspawn.sh
+            ;;
+            docker-docker)
+              bin/test-docker.sh
+            ;;
+            podman-podman)
+              sudo cp -vf ansible/files/etc/sudoers /etc/sudoers
+              CONAME='pdm4ans' CONTENGI='podman' sudo bin/test-docker.sh
+            ;;
+            *)
+              echo wrong [${PLATFORM}] platform
+              exit 1
+            ;;
+          esac
+  all-green:
+    name: all green
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    needs:
+      - test-deploy
+    if: always()
+    permissions:
+      checks: read
+    steps:
+      - name: waiting for checks success
+        uses: poseidon/wait-for-status-checks@v0.6.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ignore: all green, foobar
+          timeout: 111s
