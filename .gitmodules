@@ -1,7 +1,3 @@
-[submodule "ansible/roles/external/nftables"]
-	path = ansible/roles/external/nftables
-	url = git@github.com:raven428/ipt-cnrs-nftables.git
-	branch = master
 [submodule "ansible/roles/external/nftables-ansibleguy"]
 	path = ansible/roles/external/nftables-ansibleguy
 	url = git@github.com:raven428/ansible-role-nftables.git

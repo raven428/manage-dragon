@@ -1,25 +1,4 @@
 ---
-nft_backup_conf: False
-nft_icmp_allow:
-  - meta l4proto icmp counter accept
-nft_icmpv6_allow:
-  - meta l4proto ipv6-icmp counter accept
-nft_input_group_rules:
-  010 drop unwanted: []
-  011 drop unwanted ipv6: []
-  014 icmp: "{{ nft_icmp_allow }}"
-  013 icmpv6: "{{ nft_icmpv6_allow }}"
-  220 mdns: "{{ nft_templates.allow_mdns }}"
-nft_output_group_rules:
-  007 icmpv6: "{{ nft_icmp_allow }}"
-  008 icmp: "{{ nft_icmpv6_allow }}"
-  009 ping6: []
-  010 ping: []
-  200 output udp accepted: []
-  210 output tcp accepted: []
-  333 output accepted:
-    - ct state new accept
-
 defaults_set:
   type: "ipv4_addr"
   flags: []
