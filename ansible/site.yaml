@@ -34,6 +34,16 @@
 - name: add nftables firewall
   hosts: nftables
   become: true
+  pre_tasks:
+    - name: Installing role dependencies
+      ansible.builtin.apt:
+        name: ["kmod", "nftables"]
+        state: present
+        update_cache: true
+      register: _install_packages
+      until: _install_packages is succeeded
+      retries: 3
+      delay: 1
   roles:
-    - external/nftables
+    - external/nftables-ansibleguy
   tags: [external-nftables]

@@ -14,10 +14,10 @@ nftables:
     local:
 local:
   hosts:
-    # xpsbian:
-    #   ansible_host: xpsbian
-    # lws15dev:
-    #   ansible_host: lws15dev
+    xpsbian:
+      ansible_host: xpsbian
+    lws15dev:
+      ansible_host: lws15dev
     ubuntu22:
       ansible_user: deploy
       ansible_host: ubuntu22
@@ -27,24 +27,22 @@ global:
     aruba:
     freak:
     vdsina:
-    hetzner:
 aeza:
   hosts:
     goofy-canvas:
       ansible_host: goofy-canvas
-freak:
-  hosts:
 aruba:
   hosts:
-    g2f:
-      ansible_host: g2f
-      ansible_python_interpreter: /usr/bin/python3.6
+    carbon-brick:
+      ansible_host: carbon-brick
+freak:
+  hosts:
+    mimic-harbor:
+      ansible_host: mimic-harbor
 vdsina:
   hosts:
     casual-glove:
       ansible_host: casual-glove
-hetzner:
-  hosts:
 test:
   hosts:
     nsp4ans:

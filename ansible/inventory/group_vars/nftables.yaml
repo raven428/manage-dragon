@@ -1,21 +1,46 @@
 ---
-nft_backup_conf: False
-nft_icmp_allow:
-  - meta l4proto icmp counter accept
-nft_icmpv6_allow:
-  - meta l4proto ipv6-icmp counter accept
-nft_input_group_rules:
-  010 drop unwanted: []
-  011 drop unwanted ipv6: []
-  014 icmp: "{{ nft_icmp_allow }}"
-  013 icmpv6: "{{ nft_icmpv6_allow }}"
-  220 mdns: "{{ nft_templates.allow_mdns }}"
-nft_output_group_rules:
-  007 icmpv6: "{{ nft_icmp_allow }}"
-  008 icmp: "{{ nft_icmpv6_allow }}"
-  009 ping6: []
-  010 ping: []
-  200 output udp accepted: []
-  210 output tcp accepted: []
-  333 output accepted:
-    - ct state new accept
+defaults_set:
+  type: "ipv4_addr"
+  flags: []
+  settings: {}
+  counter: false
+
+nftables:
+  enable:
+    nat: false
+    sets: false
+    redir: false
+    table_ip4: false
+    table_inet: false
+    bash_completion: false
+  tables:
+    main:
+      sets:
+        incoming_tcp:
+          type: inet_service
+          elements: [22, 80, 443]
+        dhcp_ports:
+          type: inet_service
+          elements: [67, 68, 546, 547]
+        mdns_ip4_port:
+          type: "ipv4_addr . inet_service"
+          elements: ["224.0.0.251 . 5353", "224.0.0.252 . 5355"]
+        mdns_ip6_port:
+          type: "ipv6_addr . inet_service"
+          elements: ["ff02::fb . 5353", "ff02::fc . 5355"]
+      chains:
+        incoming:
+          hook: "input"
+          policy: "drop"
+          rules:
+            - r: 'iifname "lo" accept'
+            - r: 'meta l4proto icmp counter accept'
+            - r: 'meta l4proto ipv6-icmp counter accept'
+            - r: "ct state {established, related} counter accept"
+            - r: "udp sport @dhcp_ports udp dport @dhcp_ports accept"
+            - r: "ip daddr . udp dport @mdns_ip4_port counter accept"
+            - r: "ip6 daddr . udp dport @mdns_ip6_port counter accept"
+            - r: "tcp dport @incoming_tcp ct state new counter accept"
+        outgoing:
+          hook: "output"
+          policy: "accept"
