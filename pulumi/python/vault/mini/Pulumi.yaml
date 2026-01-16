@@ -1,0 +1,8 @@
+---
+name: mini-vault
+description: Mini Vault
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: /tmp/pulumi/venv/vault/mini
