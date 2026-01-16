@@ -7,7 +7,7 @@
     # https://github.com/ansible/ansible/blob/v2.16.10/lib/ansible/plugins/connection/ssh.py#L1428-L1435
     # from
     # https://github.com/ansible/ansible/blob/v2.16.10/lib/ansible/plugins/action/wait_for_connection.py#L87
-    - name: wait 222 seconds for connection
+    - name: wait 222 seconds for connection # noqa: syntax-check[unknown-module]
       wait_for_connection2:
         timeout: 222
       check_mode: false

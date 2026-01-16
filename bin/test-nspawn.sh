@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
+#
 : "${NSP_NAME:="nsp4ans"}"
 : "${CONTENGI:="docker"}"
 : "${CONT_NAME:="ans2nsp-${USER}"}"
@@ -16,12 +16,14 @@ echo "CONTENGI[${CONTENGI}]"
 }
 /usr/bin/env which deploy-nspawn.sh >/dev/null || {
   /usr/bin/env sudo curl -sL -o /usr/local/bin/deploy-nspawn.sh \
-    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/sources/victim-ubuntu-22_04/files/deploy.sh
+    "https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/\
+sources/victim-ubuntu-22_04/files/deploy.sh"
   /usr/bin/env sudo chmod 755 /usr/local/bin/deploy-nspawn.sh
 }
 /usr/bin/env which ansible-docker.sh >/dev/null || {
   /usr/bin/env sudo curl -fsSLm 11 -o /usr/local/bin/ansible-docker.sh \
-    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/_shared/install/ansible/ansible-docker.sh
+    "https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/\
+_shared/install/ansible/ansible-docker.sh"
   /usr/bin/env sudo chmod 755 /usr/local/bin/ansible-docker.sh
 }
 # flush firewall for nspawn deploy:
@@ -46,7 +48,7 @@ export CONTENGI ANSIBLE_IMAGE_NAME ANSIBLE_CONT_ADDONS
     ANSIBLE_CONT_NAME="${CONT_NAME}" \
     /usr/bin/env ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${NSP_NAME}"
-  /usr/bin/env ${CONTENGI} cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
+  /usr/bin/env "${CONTENGI}" cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
 }
 # shellcheck disable=2016
 changed_count="$(

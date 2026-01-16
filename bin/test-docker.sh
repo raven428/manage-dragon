@@ -17,7 +17,8 @@ echo "CONTENGI[${CONTENGI}]/CONAME[${CONAME}]"
 }
 /usr/bin/env which ansible-docker.sh >/dev/null || {
   /usr/bin/env sudo curl -fsSLm 11 -o /usr/local/bin/ansible-docker.sh \
-    https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/_shared/install/ansible/ansible-docker.sh
+    "https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/\
+_shared/install/ansible/ansible-docker.sh"
   /usr/bin/env sudo chmod 755 /usr/local/bin/ansible-docker.sh
   /usr/bin/env sudo sed -i 's/--network=host//g' /usr/local/bin/ansible-docker.sh
 }
@@ -25,8 +26,8 @@ echo "CONTENGI[${CONTENGI}]/CONAME[${CONAME}]"
 ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-11:latest'
 [[ "${CONTENGI}" == 'docker' ]] && {
   ANSIBLE_IMAGE_NAME="ghcr.io/raven428/container-images/${CONTENGI}-ansible-11:latest"
-  ANSIBLE_CONT_ADDONS='--cap-add=NET_ADMIN --cap-add=SYS_MODULE --cgroupns=host
---privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw --network=host'
+  ANSIBLE_CONT_ADDONS="--cap-add=NET_ADMIN --cap-add=SYS_MODULE --cgroupns=host \
+--privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw --network=host"
   export ANSIBLE_CONT_COMMAND=' '
 }
 [[ "${CONTENGI}" == 'podman' ]] && {
@@ -40,7 +41,7 @@ export CONTENGI ANSIBLE_CONT_ADDONS ANSIBLE_IMAGE_NAME
 }
 [[ "${CONTENGI}" == 'docker' ]] && {
   count=7
-  while ! /usr/bin/env ${CONTENGI} exec "${CONT_NAME}" systemctl status docker; do
+  while ! /usr/bin/env "${CONTENGI}" exec "${CONT_NAME}" systemctl status docker; do
     echo "waiting container ready, left [$count] tries"
     count=$((count - 1))
     if [[ $count -le 0 ]]; then
@@ -50,8 +51,8 @@ export CONTENGI ANSIBLE_CONT_ADDONS ANSIBLE_IMAGE_NAME
   done
 }
 [[ "${CONTENGI}" == 'podman' ]] && {
-  /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" mkdir -p /etc/containers
-  /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" sh -c \
+  /usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" mkdir -p /etc/containers
+  /usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" sh -c \
     'cat <<EOF >/etc/containers/storage.conf
 [storage]
 driver = "vfs"
@@ -59,24 +60,27 @@ runroot = "/run/containers/storage"
 graphroot = "/var/lib/containers/storage"
 EOF'
 }
-/usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" ${CONTENGI} pull "${IMAGE}"
-/usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" ${CONTENGI} tag "${IMAGE}" "${CONAME}:l"
-[[ "${CONTENGI}" == 'podman' ]] && export ANSIBLE_CONT_ADDONS='--cap-add=NET_ADMIN,SYS_MODULE,SYS_ADMIN'
-/usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" ${CONTENGI} \
-  inspect "${CONAME}" >/dev/null || /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" \
-  ${CONTENGI} run -d ${ANSIBLE_CONT_ADDONS} --hostname="${CONAME}" --name="${CONAME}" \
+/usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" "${CONTENGI}" pull "${IMAGE}"
+/usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" "${CONTENGI}" tag "${IMAGE}" \
   "${CONAME}:l"
+[[ "${CONTENGI}" == 'podman' ]] &&
+  export ANSIBLE_CONT_ADDONS='--cap-add=NET_ADMIN,SYS_MODULE,SYS_ADMIN'
+# shellcheck disable=2086
+/usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" "${CONTENGI}" \
+  inspect "${CONAME}" >/dev/null || /usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" \
+  "${CONTENGI}" run -d ${ANSIBLE_CONT_ADDONS} --hostname="${CONAME}" \
+  --name="${CONAME}" "${CONAME}:l"
 tmp_log=$(/usr/bin/env mktemp "/tmp/ansidemXXXXX.log")
 {
   cd "${MY_PATH}/../ansible"
   ANSIBLE_CONT_NAME="${CONT_NAME}" \
     ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${CONAME}"
-  ANSIBLE_LOG_PATH=${tmp_log} \
+  ANSIBLE_LOG_PATH="${tmp_log}" \
     ANSIBLE_CONT_NAME="${CONT_NAME}" \
     ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${CONAME}"
-  /usr/bin/env ${CONTENGI} cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
+  /usr/bin/env "${CONTENGI}" cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
 }
 # shellcheck disable=2016
 changed_count="$(
@@ -89,6 +93,5 @@ if [[ ${changed_count} -gt 0 ]]; then
   res=$((res + 1))
 fi
 /usr/bin/env rm -fv "${tmp_log}"
-/usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" \
-  ${CONTENGI} rm -f "${CONAME}"
+/usr/bin/env "${CONTENGI}" exec -t "${CONT_NAME}" "${CONTENGI}" rm -f "${CONAME}"
 exit "${res}"
