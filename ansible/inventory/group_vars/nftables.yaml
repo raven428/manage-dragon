@@ -34,8 +34,8 @@ nftables:
           policy: "drop"
           rules:
             - r: 'iifname "lo" accept'
-            - r: 'meta l4proto icmp counter accept'
-            - r: 'meta l4proto ipv6-icmp counter accept'
+            - r: "meta l4proto icmp counter accept"
+            - r: "meta l4proto ipv6-icmp counter accept"
             - r: "ct state {established, related} counter accept"
             - r: "udp sport @dhcp_ports udp dport @dhcp_ports accept"
             - r: "ip daddr . udp dport @mdns_ip4_port counter accept"

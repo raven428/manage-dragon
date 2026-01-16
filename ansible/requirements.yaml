@@ -1,0 +1,4 @@
+---
+- name: raven428.mini_vault
+- name: external/nftables-ansibleguy
+  src: git+https://github.com/raven428/ansible-role-nftables.git
