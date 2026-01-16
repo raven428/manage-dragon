@@ -1,0 +1,101 @@
+---
+# unable to use 2 spaces indents
+DISABLE_LINTERS:
+  - PYTHON_BLACK
+  - PYTHON_ISORT
+# ENABLE_LINTERS:
+#   - BASH_EXEC
+#   - SPELL_CSPELL
+#   - EDITORCONFIG_EDITORCONFIG_CHECKER
+REPORT_OUTPUT_FOLDER: none
+PARALLEL_PROCESS_NUMBER: 11
+OUTPUT_FORMAT: text
+BASH_SHFMT_ARGUMENTS: "-i 2"
+REPOSITORY_CHECKOV_ARGUMENTS: >-
+  --skip-path ansible/roles/external
+  --skip-check CKV2_GHA_1,CKV2_ANSIBLE_3,CKV_ANSIBLE_5,CKV_ANSIBLE_6
+PRINT_ALL_FILES: true
+EDITORCONFIG_EDITORCONFIG_CHECKER_CLI_EXECUTABLE:
+  - /ec-custom.sh
+EDITORCONFIG_EDITORCONFIG_CHECKER_PRE_COMMANDS:
+  - command: |
+      cat <<EOF > /ec-custom.sh
+      #!/usr/bin/env bash
+      editorconfig-checker \$@
+      rc=\$?
+      # check for multiple empty lines at EOF
+      for file in \$@; do
+        tail_lines=\$(tail -n 2 "\$file" | grep -c '^$')
+        if [ "\$tail_lines" -gt 1 ]; then
+          echo "File [\$file] has multiple trailing line"
+          rc=\$((rc + 1))
+        fi
+      done
+      exit \$rc
+      EOF
+      chmod -v 755 /ec-custom.sh
+    cwd: workspace
+    continue_if_failed: true
+REPOSITORY_TRIVY_ARGUMENTS:
+  - "--no-progress"
+REPOSITORY_DEVSKIM_ARGUMENTS:
+  - "-f"
+  - "text"
+ANSIBLE_ANSIBLE_LINT_ARGUMENTS: "-f pep8 --force-color --exclude ansible/roles/external"
+ANSIBLE_ANSIBLE_LINT_COMMAND_REMOVE_ARGUMENTS: "-v"
+REPOSITORY_KINGFISHER_ARGUMENTS: "--exclude .git"
+YAML_V8R_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+YAML_YAMLLINT_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+MARKDOWN_MARKDOWNLINT_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+MARKDOWN_MARKDOWN_TABLE_FORMATTER_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+YAML_PRETTIER_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+SPELL_LYCHEE_FILTER_REGEX_EXCLUDE: "ansible/roles/external"
+PYTHON_PYRIGHT_FILTER_REGEX_EXCLUDE: "\
+  ansible/plugins/action/wait_for_connection2\\.py|\
+  ansible/roles/external"
+PYTHON_PYRIGHT_PRE_COMMANDS:
+  - command: "pip install -r pulumi/python/vault/mini/requirements.txt"
+    cwd: workspace
+PYTHON_FLAKE8_FILTER_REGEX_EXCLUDE: "\
+  ansible/plugins/action/wait_for_connection2\\.py|\
+  ansible/roles/external"
+PYTHON_PYLINT_FILTER_REGEX_EXCLUDE: "\
+  ansible/plugins/action/wait_for_connection2\\.py|\
+  ansible/roles/external"
+PYTHON_PYLINT_PRE_COMMANDS:
+  - command: '$(dirname "$(which pylint)")/python -m pip install -r
+      pulumi/python/vault/mini/requirements.txt'
+    cwd: workspace
+PYTHON_MYPY_FILTER_REGEX_EXCLUDE: "\
+  ansible/plugins/action/wait_for_connection2\\.py|\
+  ansible/roles/external"
+PYTHON_MYPY_PRE_COMMANDS:
+  - command: '$(dirname "$(which mypy)")/python -m pip install -r
+      pulumi/python/vault/mini/requirements.txt'
+    cwd: workspace
+PYTHON_RUFF_FILTER_REGEX_EXCLUDE: "\
+  ansible/plugins/action/wait_for_connection2\\.py|\
+  ansible/roles/external"
+GO_GOLANGCI_LINT_CLI_EXECUTABLE:
+  - /gl-ci-custom.sh
+GO_GOLANGCI_LINT_PRE_COMMANDS:
+  - command: |
+      dir_list='pulumi/golang/vault/mini'
+      cat <<EOF > /gl-ci-custom.sh
+      #!/usr/bin/env bash
+      [[ \$1 = "version" ]] && {
+        golangci-lint \$@
+        exit \$?
+      }
+      workspace='${PWD}'
+      rc=0
+      for d in ${dir_list}; do
+        cd "\${workspace}/\${d}"
+        golangci-lint \$@ || rc=\$((rc + 1))
+      done
+      exit \$rc
+      EOF
+      chmod -v 755 /gl-ci-custom.sh
+    cwd: workspace
+    continue_if_failed: true
