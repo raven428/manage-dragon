@@ -1,0 +1,3 @@
+{
+  "extraPaths": ["pulumi/python/vault/mini"]
+}

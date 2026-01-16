@@ -1,0 +1,16 @@
+root = true
+
+[*]
+indent_size = 2
+indent_style = space
+end_of_line = lf
+max_line_length = 90
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.go]
+indent_style = tab
+max_line_length = 222
+
+[{README.md,.gitmodules,ansible/site.yaml}]
+max_line_length = 222
