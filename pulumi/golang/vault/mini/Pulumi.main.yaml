@@ -1,0 +1,9 @@
+---
+config:
+  mini-vault:admins:
+    - raven
+    - magister
+  mini-vault:groups:
+    - green-wire
+    - green-mercs
+    - manage-dragon
