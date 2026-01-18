@@ -10,8 +10,8 @@ MY_BIN="$(readlink -f "$0")"
 MY_PATH="$(dirname "${MY_BIN}")"
 res=0
 echo "CONTENGI[${CONTENGI}]/CONAME[${CONAME}]"
+/usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get purge -y needrestart'
 /usr/bin/env which sponge >/dev/null || {
-  /usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get purge -y needrestart'
   /usr/bin/env sudo apt-get update &&
     /usr/bin/env sudo su -c 'DEBIAN_FRONTEND=noninteractive apt-get install -y moreutils'
 }
@@ -74,11 +74,13 @@ tmp_log=$(/usr/bin/env mktemp "/tmp/ansidemXXXXX.log")
 {
   cd "${MY_PATH}/../ansible"
   ANSIBLE_CONT_NAME="${CONT_NAME}" \
-    ansible-docker.sh ansible-playbook site.yaml \
+    /usr/bin/env ansible-docker.sh ansible-galaxy install -r requirements.yaml
+  ANSIBLE_CONT_NAME="${CONT_NAME}" \
+    /usr/bin/env ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${CONAME}"
   ANSIBLE_LOG_PATH="${tmp_log}" \
     ANSIBLE_CONT_NAME="${CONT_NAME}" \
-    ansible-docker.sh ansible-playbook site.yaml \
+    /usr/bin/env ansible-docker.sh ansible-playbook site.yaml \
     --diff -i inventory -u root -l "${CONAME}"
   /usr/bin/env "${CONTENGI}" cp "${CONT_NAME}:${tmp_log}" "${tmp_log}"
 }
