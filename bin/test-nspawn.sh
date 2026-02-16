@@ -24,8 +24,13 @@ echo "CONTENGI[${CONTENGI}]"
     https://raw.githubusercontent.com/raven428/container-images/refs/heads/master/_shared/install/ansible/ansible-docker.sh
   /usr/bin/env sudo chmod 755 /usr/local/bin/ansible-docker.sh
 }
+# flush firewall for nspawn deploy:
+/usr/bin/env sudo nft flush ruleset
 # shellcheck disable=1090
 source "$(which deploy-nspawn.sh)"
+# recover docker and podman rules:
+/usr/bin/env sudo systemctl restart docker
+/usr/bin/env sudo systemctl restart podman
 tmp_log=$(/usr/bin/env mktemp "/tmp/ansidemXXXXX.log")
 ANSIBLE_IMAGE_NAME='ghcr.io/raven428/container-images/ansible-11:latest'
 [[ "${CONTENGI}" == 'podman' ]] && export ANSIBLE_CONT_ADDONS='--userns=keep-id'
