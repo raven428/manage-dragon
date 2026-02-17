@@ -1,0 +1,4 @@
+---
+name: mini-vault
+description: Mini Vault
+runtime: go
