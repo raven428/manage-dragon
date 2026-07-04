@@ -52,7 +52,11 @@ export CONTENGI ANSIBLE_CONT_ADDONS ANSIBLE_IMAGE_NAME
 [[ "${CONTENGI}" == 'podman' ]] && {
   /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" mkdir -p /etc/containers
   /usr/bin/env ${CONTENGI} exec -t "${CONT_NAME}" sh -c \
-    'cat <<EOF >/etc/containers/storage.conf
+    '
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+apt-get update && apt-get install -y --no-install-recommends nftables
+cat <<EOF >/etc/containers/storage.conf
 [storage]
 driver = "vfs"
 runroot = "/run/containers/storage"
