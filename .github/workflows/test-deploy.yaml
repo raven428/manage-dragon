@@ -8,49 +8,40 @@ on:
   pull_request:
   schedule:
     - cron: "11 11 * * 1"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions: {}
 jobs:
-  test-deploy:
+  deploy-test:
     name: deploy
     timeout-minutes: 11
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
+        distro:
+          - "debian13"
+          - "ubuntu24"
+          - "ubuntu26"
         platform:
-          - nspawn-docker
-          - nspawn-podman
-          - docker-docker
-          - podman-podman
+          - docker
+          - podman
+          - nspawn
+        ansible_ver:
+          - "11"
     steps:
       - uses: actions/checkout@v7 # zizmor: ignore[unpinned-uses]
         with:
           fetch-depth: 0
           submodules: true
           persist-credentials: false
-      - name: test docker deploy to nspawn
+      - name: test ansible deploy
         env:
+          DISTRO: ${{ matrix.distro }}
           PLATFORM: ${{ matrix.platform }}
-        run: |
-          case "${PLATFORM}" in
-            nspawn-docker)
-              bin/test-nspawn.sh
-            ;;
-            nspawn-podman)
-              CONTENGI='podman' bin/test-nspawn.sh
-            ;;
-            docker-docker)
-              bin/test-docker.sh
-            ;;
-            podman-podman)
-              sudo cp -vf ansible/files/etc/sudoers /etc/sudoers
-              CONAME='pdm4ans' CONTENGI='podman' sudo bin/test-docker.sh
-            ;;
-            *)
-              echo "wrong [${PLATFORM}] platform"
-              exit 1
-            ;;
-          esac
+          ANSIBLE_VER: ${{ matrix.ansible_ver }}
+        run: "bin/deploy-test.sh"
   linters:
     name: linters
     timeout-minutes: 11
@@ -90,7 +81,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     needs:
-      - test-deploy
+      - deploy-test
       - linters
       - MegaLinter
     if: always()
