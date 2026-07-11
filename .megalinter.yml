@@ -99,3 +99,7 @@ GO_GOLANGCI_LINT_PRE_COMMANDS:
       chmod -v 755 /gl-ci-custom.sh
     cwd: workspace
     continue_if_failed: true
+SPELL_CSPELL_PRE_COMMANDS:
+  - command: |
+      npm install --prefix /node-deps @cspell/dict-ru_ru @cspell/dict-software-terms
+    cwd: root
