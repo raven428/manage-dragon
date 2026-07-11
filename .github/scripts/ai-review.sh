@@ -16,7 +16,7 @@ if [[ -z "${PR_NUMBER:-}" && "${GITHUB_REF_TYPE:-}" == "branch" &&
   pr_number="$(curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application\
 /vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY_OWNER}/\
 ${GITHUB_REPOSITORY_NAME}/pulls?head=${GITHUB_REPOSITORY_OWNER}:${GITHUB_REF_NAME}\
-&state=open" | jq -r '.[0].number // empty')" || pr_number=""
+&state=open" | jq -r '.[0].number // empty' 2>/dev/null)" || pr_number=""
   export PR_NUMBER="${pr_number}"
 fi
 launcher=(
@@ -45,8 +45,10 @@ if ((${#commands[@]} == 0)); then
   echo "No review commands selected" >&2
   exit 1
 fi
-script="ai-review show-config"
+# shellcheck disable=SC2016
+inner_script='ai-review show-config && for cmd in "$@"; do ai-review "$cmd" || exit; done'
+inner=(bash -c "${inner_script}" _)
 for cmd in "${commands[@]}"; do
-  script+=" && ai-review ${cmd}"
+  inner+=("${cmd}")
 done
-"${launcher[@]}" bash -c "${script}"
+"${launcher[@]}" "${inner[@]}"
