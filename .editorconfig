@@ -8,6 +8,9 @@ max_line_length = 90
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+[*.go]
+indent_style = tab
+
 [{*.md,*.json}]
 max_line_length = unset
 

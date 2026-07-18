@@ -81,7 +81,7 @@ GO_GOLANGCI_LINT_CLI_EXECUTABLE:
   - /gl-ci-custom.sh
 GO_GOLANGCI_LINT_PRE_COMMANDS:
   - command: |
-      dir_list='pulumi/golang/vault/mini'
+      dir_list='golang'
       cat <<EOF > /gl-ci-custom.sh
       #!/usr/bin/env bash
       [[ \$1 = "version" ]] && {
