@@ -36,13 +36,6 @@ jobs:
           fetch-depth: 0
           submodules: true
           persist-credentials: false
-      - name: checkout go-lib
-        uses: actions/checkout@v7 # zizmor: ignore[unpinned-uses]
-        with:
-          repository: megalomania428/go-lib-ci
-          ref: updates-002
-          path: go-lib/ci
-          persist-credentials: false
       - name: setup go
         uses: actions/setup-go@v7 # zizmor: ignore[unpinned-uses]
         with:
@@ -84,13 +77,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-          persist-credentials: false
-      - name: checkout go-lib
-        uses: actions/checkout@v7 # zizmor: ignore[unpinned-uses]
-        with:
-          repository: megalomania428/go-lib-ci
-          ref: updates-002
-          path: go-lib/ci
           persist-credentials: false
       - name: MegaLinter
         uses: oxsecurity/megalinter@v9 # zizmor: ignore[unpinned-uses]

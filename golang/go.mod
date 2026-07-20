@@ -2,9 +2,7 @@ module github.com/raven428/manage-dragon/golang
 
 go 1.25.12
 
-replace github.com/megalomania428/go-lib-ci => ../go-lib/ci
-
-require github.com/megalomania428/go-lib-ci v0.0.0
+require github.com/megalomania428/go-lib-ci v1.0.0
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
