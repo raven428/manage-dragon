@@ -1,4 +1,5 @@
 ---
+# cspell:ignore golangci GOTOOLCHAIN
 # unable to use 2 spaces indents
 DISABLE_LINTERS:
   - PYTHON_BLACK
@@ -10,6 +11,9 @@ DISABLE_LINTERS:
 REPORT_OUTPUT_FOLDER: none
 PARALLEL_PROCESS_NUMBER: 11
 OUTPUT_FORMAT: text
+EXCLUDED_DIRECTORIES:
+  - ".git"
+  - ".vscode"
 BASH_SHFMT_ARGUMENTS: "-i 2"
 REPOSITORY_CHECKOV_ARGUMENTS: >-
   --skip-path ansible/roles/external
@@ -19,19 +23,19 @@ EDITORCONFIG_EDITORCONFIG_CHECKER_CLI_EXECUTABLE:
   - /ec-custom.sh
 EDITORCONFIG_EDITORCONFIG_CHECKER_PRE_COMMANDS:
   - command: |
-      cat <<EOF > /ec-custom.sh
+      cat <<'EOF' > /ec-custom.sh
       #!/usr/bin/env bash
-      editorconfig-checker \$@
-      rc=\$?
+      editorconfig-checker "$@"
+      rc=$?
       # check for multiple empty lines at EOF
-      for file in \$@; do
-        tail_lines=\$(tail -n 2 "\$file" | grep -c '^$')
-        if [ "\$tail_lines" -gt 1 ]; then
-          echo "File [\$file] has multiple trailing line"
-          rc=\$((rc + 1))
+      for file in "$@"; do
+        tail_lines=$(tail -n 2 -- "$file" | grep -c '^$')
+        if [ "$tail_lines" -gt 1 ]; then
+          echo "File [$file] has multiple trailing lines"
+          rc=1
         fi
       done
-      exit \$rc
+      exit $rc
       EOF
       chmod -v 755 /ec-custom.sh
     cwd: workspace
@@ -81,25 +85,28 @@ GO_GOLANGCI_LINT_CLI_EXECUTABLE:
   - /gl-ci-custom.sh
 GO_GOLANGCI_LINT_PRE_COMMANDS:
   - command: |
-      dir_list='golang'
-      cat <<EOF > /gl-ci-custom.sh
+      cat <<'EOF' > /gl-ci-custom.sh
       #!/usr/bin/env bash
-      [[ \$1 = "version" ]] && {
-        golangci-lint \$@
-        exit \$?
+      [[ $1 = "version" ]] && {
+        golangci-lint "$@"
+        exit $?
       }
-      workspace='${PWD}'
       rc=0
+      dir_list='golang'
+      workspace="${PWD}"
+      go env -w GOTOOLCHAIN=auto
       for d in ${dir_list}; do
-        cd "\${workspace}/\${d}"
-        golangci-lint \$@ || rc=\$((rc + 1))
+        echo "go-linting-ci [${d}] dir"
+        cd "${workspace}/${d}"
+        go mod download
+        golangci-lint "$@" || rc=1
       done
-      exit \$rc
+      exit $rc
       EOF
       chmod -v 755 /gl-ci-custom.sh
     cwd: workspace
     continue_if_failed: true
 SPELL_CSPELL_PRE_COMMANDS:
-  - command: |
-      npm install --prefix /node-deps @cspell/dict-ru_ru @cspell/dict-software-terms
+  - command: "npm install --prefix /node-deps @cspell/dict-ru_ru
+      @cspell/dict-software-terms"
     cwd: root
