@@ -7,7 +7,7 @@
 #   fetch_ansible_appimage "${ANSIBLE_VER}"    # e.g. "11" -> ansible-11-001.AppImage
 #   "${APPIMAGE_BIN}" ansible-playbook ...
 : "${APPIMAGE_RELEASE:="latest"}"
-: "${APPIMAGE_BUILD:="001"}"
+: "${APPIMAGE_BUILD:="005"}"
 : "${RETRY_MAX:=5}"
 : "${RETRY_SLEEP_MAX:=10}"
 : "${CURL_CONNECT_TIMEOUT:=11}"

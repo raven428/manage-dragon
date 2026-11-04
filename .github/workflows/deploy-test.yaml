@@ -71,7 +71,7 @@ jobs:
   MegaLinter:
     name: MegaLinter
     timeout-minutes: 11
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7 # zizmor: ignore[unpinned-uses]
         with:
@@ -85,18 +85,15 @@ jobs:
   all-green:
     name: all green
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - deploy-test
       - linters
       - MegaLinter
-    if: always()
-    permissions:
-      checks: read
+    if: ${{ always() && github.event_name == 'pull_request' }}
     steps:
-      - name: waiting for checks success
-        uses: poseidon/wait-for-status-checks@v0.6.0 # zizmor: ignore[unpinned-uses]
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ignore: all green
-          timeout: 111s
+      - name: Check dependencies
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -e 'all(.[]; .result == "success")'
