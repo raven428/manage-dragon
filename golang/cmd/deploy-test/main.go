@@ -78,7 +78,7 @@ func run(ctx context.Context) error {
 // fetchAnsibleAppImage wraps ci.FetchGithubRelease for the ansible AppImage
 // convention: repo raven428/container-images, asset ansible-<ver>-001.AppImage.
 func fetchAnsibleAppImage(ctx context.Context, ver string) (string, error) {
-	build := getenv("APPIMAGE_BUILD", "001")
+	build := getenv("APPIMAGE_BUILD", "005")
 	release := getenv("APPIMAGE_RELEASE", "")
 	assetName := fmt.Sprintf("ansible-%s-%s.AppImage", ver, build)
 	destDir := filepath.Join(os.Getenv("HOME"), "bin")
